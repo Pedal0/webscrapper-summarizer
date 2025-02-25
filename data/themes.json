@@ -1,0 +1,16 @@
+{
+  "themes": [
+    {
+      "name": "Actualité",
+      "description": "Actualités générales"
+    },
+    {
+      "name": "Technologie",
+      "description": "Nouvelles technologies et innovations"
+    },
+    {
+      "name": "Science",
+      "description": "Découvertes scientifiques récentes"
+    }
+  ]
+}
