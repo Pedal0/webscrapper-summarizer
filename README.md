@@ -29,11 +29,11 @@ This application is designed to scrape websites and summarize the extracted cont
    Create a `.env` file at the root of the project with the following content:
    ```
    OPENROUTER_API_KEY=your_openrouter_api_key_here
-   ELEVEN_LABS_API_KEY=your_elevenlabs_api_key_here
+   RAPID_API_KEY=your_rapid_api_key_here
    ```
    You can obtain your API keys at:
    - [OpenRouter](https://openrouter.ai/) - For AI text generation
-   - [ElevenLabs](https://elevenlabs.io/) - For text-to-speech audio generation
+   - [RAPID](https://rapidapi.com/brucewwx/api/streamlined-edge-tts) - For text-to-speech audio generation
 
 ## Configuration
 

@@ -1,7 +1,7 @@
 import os
 import sys
 import json
-from elevenlabs import ElevenLabs
+import requests
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 import streamlit as st
 from dotenv import load_dotenv
@@ -9,7 +9,7 @@ from openai_integration.llm_interface import generate_summary
 from scrapper.scraper import scrape_the_web
 
 load_dotenv()
-ELEVEN_LABS_API_KEY = os.getenv("ELEVEN_LABS_API_KEY")
+RAPID_API_KEY = os.getenv("RAPID_API_KEY")
 
 def load_themes():
     themes_path = os.path.join('data', 'themes.json')
@@ -40,7 +40,6 @@ if not selected_theme:
 
 summary = ""
 audio_data = None
-alignment_data = None
 
 if selected_theme:
     col1, col2, col3 = st.columns([2, 1, 2])
@@ -48,39 +47,35 @@ if selected_theme:
         if st.button("Lancer le scraping"):
             with st.spinner("Analyse en cours..."):
                 try:
-                    scraped_data = scrape_the_web(selected_theme, depth=1) 
-                    
+                    scraped_data = scrape_the_web(selected_theme, depth=1)
                     summary = generate_summary(selected_theme, str(scraped_data))
-                    # summary = "Bonjour ceci est un test du text to speech"
                     
-                    if ELEVEN_LABS_API_KEY:
+                    with st.spinner("Génération de l'audio en cours..."):
                         try:
-                            with st.spinner("Génération de l'audio en cours..."):
-                                client = ElevenLabs(api_key=ELEVEN_LABS_API_KEY)
-                                voice_id = "CwhRBWXzGAHq8TQ4Fs17"
-                                
-                                audio_stream = client.text_to_speech.convert_as_stream(
-                                    voice_id=voice_id,
-                                    output_format="mp3_44100_128",
-                                    text=summary,
-                                    model_id="eleven_multilingual_v2"
-                                )
-                                
-                                # Convert generator to bytes by consuming all chunks
-                                if hasattr(audio_stream, '__iter__'):
-                                    audio_chunks = list(audio_stream)  
-                                    audio_data = b"".join(audio_chunks)  
+                            # Utilisation de l'API Streamlined Edge TTS
+                            tts_url = "https://streamlined-edge-tts.p.rapidapi.com/tts"
+                            payload = {
+                                "text": summary.replace('*', ''),
+                                "voice": "fr-FR-RemyMultilingual"  
+                            }
+                            tts_headers = {
+                                "x-rapidapi-key": RAPID_API_KEY,
+                                "x-rapidapi-host": "streamlined-edge-tts.p.rapidapi.com",
+                                "Content-Type": "application/json"
+                            }
+                            tts_response = requests.post(tts_url, json=payload, headers=tts_headers)
+                            if tts_response.status_code == 200:
+                                content_type = tts_response.headers.get("Content-Type", "")
+                                if "audio" in content_type:
+                                    audio_data = tts_response.content
+                                    st.success("Audio généré avec succès!")
                                 else:
-                                    audio_data = audio_stream
-                                    
-                                st.success("Audio généré avec succès!")
-                                
+                                    st.error("La réponse n'est pas un flux audio. Content-Type: " + content_type)
+                            else:
+                                st.error("Erreur lors de la génération de l'audio: " + tts_response.text)
                         except Exception as e:
-                            st.error(f"Erreur lors de la génération de l'audio : {str(e)}")
-                            audio_data = None
-                    else:
-                        st.warning("Clé API ElevenLabs non configurée. L'audio ne sera pas généré.")
-                        
+                            st.error("Erreur lors de la génération de l'audio: " + str(e))
+                            
                 except Exception as e:
                     st.error("Erreur lors de l'analyse : " + str(e))
     
@@ -89,21 +84,7 @@ if selected_theme:
         
         if audio_data:
             st.audio(audio_data, format="audio/mp3")
-            
-            speed = st.slider("Vitesse de lecture", min_value=0.5, max_value=2.0, value=1.0, step=0.1)
-            st.markdown(f"""
-            <script>
-            document.addEventListener('DOMContentLoaded', function() {{
-                const audioElement = document.querySelector('audio');
-                if (audioElement) {{
-                    audioElement.playbackRate = {speed};
-                }}
-            }});
-            </script>
-            """, unsafe_allow_html=True)
-            
-        st.markdown(summary)
-        
+                    
         if audio_data:
             st.download_button(
                 label="Télécharger l'audio (MP3)",

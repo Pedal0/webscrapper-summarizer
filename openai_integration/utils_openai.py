@@ -12,10 +12,11 @@ def format_prompt(user_input, theme):
     Voici les informations extraites :
     {user_input}
     
-    En te basant sur ces informations, rédige un résumé clair et concis sous forme de mini newsletter qui présente :
+    En te basant sur ces informations, rédige un résumé clair et concis sous forme de mini texte qui présente :
     - Les points saillants des articles
     - Les tendances principales
     - Un aperçu global des informations apprises
+    - Des connecteurs entre les différentes phrases pour une meilleure fluidité
     
     Le résumé doit être facile à lire par un utilisateur et ne contenir aucun formatage JSON.
     """
@@ -35,6 +36,7 @@ def send_openai_request(api_key, prompt, temperature=0.7):
                     "Tu es un assistant expert en synthèse d'informations. "
                     "Génère un résumé clair, concis et compréhensible par un humain. "
                     "La réponse doit être exclusivement du texte explicatif, sans aucun formatage JSON, sans code, et sans autre type de balisage."
+                    "Le texte doit etre facile a lire pour un présentateur."
                 )},
                 {"role": "user", "content": prompt}
             ],
