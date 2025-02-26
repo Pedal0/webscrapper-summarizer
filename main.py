@@ -45,7 +45,7 @@ if selected_theme:
         if st.button("Lancer le scraping"):
             with st.spinner("Analyse en cours..."):
                 try:
-                    scraped_data = scrape_the_web(selected_theme)
+                    scraped_data = scrape_the_web(selected_theme, depth=2) 
                     
                     summary = generate_summary(selected_theme, str(scraped_data))
                     
