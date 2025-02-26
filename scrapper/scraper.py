@@ -126,7 +126,6 @@ def scrape_the_web(selected_theme: str, depth: int = 1) -> List[Dict]:
     scraper = WebScraper(theme_instance)
     
     for url in urls:
-        # Utiliser scrap_with_depth au lieu de scrap
         all_scraped_data.extend(scraper.scrap_with_depth(url, depth))
         
     return all_scraped_data
